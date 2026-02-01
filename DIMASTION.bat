@@ -2,17 +2,14 @@
 setlocal enabledelayedexpansion
 chcp 65001 > nul
 
-:: ==================== КОНФИГУРАЦИЯ ====================
 set "BIN=%~dp0bin\"
 set "LISTS=%~dp0lists\"
 set "TEMP_DIR=%temp%\zapret\"
 if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 
-:: ==================== СОЗДАНИЕ ОПТИМИЗИРОВАННОГО СПИСКА ====================
 set "OPTIMIZED_LIST=%TEMP_DIR%optimized_list.txt"
 if exist "%OPTIMIZED_LIST%" del "%OPTIMIZED_LIST%"
 
-:: 1. Извлекаем встроенный список (основной приоритет)
 set "extract=0"
 for /f "usebackq tokens=*" %%a in ("%~f0") do (
     if "%%a"==":LIST_END" set "extract=0"
@@ -20,7 +17,6 @@ for /f "usebackq tokens=*" %%a in ("%~f0") do (
     if "%%a"==":LIST_START" set "extract=1"
 )
 
-:: 2. Добавляем дискорд-специфичные домены в начало для приоритета
 set "DISCORD_TEMP=%TEMP_DIR%discord_temp.txt"
 (
     echo discord.com
@@ -33,7 +29,6 @@ set "DISCORD_TEMP=%TEMP_DIR%discord_temp.txt"
 ) > "%DISCORD_TEMP%"
 type "%DISCORD_TEMP%" >> "%OPTIMIZED_LIST%"
 
-:: 3. Добавляем YouTube домены
 (
     echo youtube.com
     echo youtu.be
@@ -41,11 +36,9 @@ type "%DISCORD_TEMP%" >> "%OPTIMIZED_LIST%"
     echo ytimg.com
 ) >> "%OPTIMIZED_LIST%"
 
-:: Удаляем дубликаты и сортируем
 sort "%OPTIMIZED_LIST%" /unique > "%OPTIMIZED_LIST%.sorted"
 move /y "%OPTIMIZED_LIST%.sorted" "%OPTIMIZED_LIST%" >nul
 
-:: ==================== ПРОВЕРКА СЕРВИСА ====================
 cd /d "%~dp0"
 if exist "service.bat" (
     call service.bat status_zapret
@@ -53,13 +46,11 @@ if exist "service.bat" (
     echo.
 )
 
-:: ==================== ЗАПУСК С УЛУЧШЕННЫМИ ПАРАМЕТРАМИ ====================
 cd /d "%BIN%"
 
 echo Запуск DIMASTION с оптимизированными настройками...
 echo.
 
-:: Упрощенная и оптимизированная команда запуска
 start "zapret: %~n0" /min "%BIN%winws.exe" ^
 --wf-tcp=80,443,2053,2083,2087,2096,8443,%GameFilter% ^
 --wf-udp=443,19294-19344,50000-50100,%GameFilter% ^
@@ -504,4 +495,5 @@ community.torproject.org
 1.0.0.1
 208.67.222.222
 208.67.220.220
+
 :LIST_END
